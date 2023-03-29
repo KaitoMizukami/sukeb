@@ -1,0 +1,10 @@
+<h3 class="is-size-3">
+    県名検索
+</h3>
+<hr>
+<a href="{% url 'posts:list' %}">全て</a>
+<br>
+{% for prefecture in prefectures %}
+    {% comment %} タプルの最初の要素を表示 {% endcomment %}
+    <a href="{% url 'posts:list' %}?query={{ prefecture|first }}" class="mr-5">{{ prefecture|first}}</a>
+{% endfor %}
