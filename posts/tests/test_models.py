@@ -1,8 +1,3 @@
-""" 
-PostとSkateparkモデルのテスト
-"""
-
-
 from django.test import TestCase
 from django.db.utils import DataError
 
@@ -11,20 +6,11 @@ from posts.models import Skatepark, Post
 
 
 class SkateparkModelTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        skatepark = Skatepark(name='Test skatepark', prefecture='神奈川', city='横浜', skatepark_image='test_image.jpg')
-        skatepark.save()
-        user = User.objects.create(username='testuser', email='test@mail.com')
-        user.set_password('testpassword')
-        user.save()
-        post = Post(author=user, skatepark=skatepark, body='Test body')
-        post.save()
-    
     def setUp(self):
-        self.skatepark = Skatepark.objects.get(id=1)
-        self.user = User.objects.get(id=1)
-        self.post = Post.objects.get(id=1)
+        self.skatepark = Skatepark(name='Test skatepark', prefecture='神奈川', city='横浜', skatepark_image='test_image.jpg')
+        self.skatepark.save()
+        self.user = User.objects.create(username='testuser', email='test@mail.com', password='testpassword')
+        self.user.save()
     
     def test_name_label(self):
         """
@@ -105,6 +91,16 @@ class SkateparkModelTest(TestCase):
         """
         self.assertEqual(str(self.skatepark), f'{self.skatepark.name}({self.skatepark.prefecture})')
 
+
+class PostModelTest(TestCase):
+    def setUp(self):
+        self.skatepark = Skatepark(name='Test skatepark', prefecture='神奈川', city='横浜', skatepark_image='test_image.jpg')
+        self.skatepark.save()
+        self.user = User.objects.create(username='testuser', email='test@mail.com', password='testpassword')
+        self.user.save()
+        self.post = Post(author=self.user, skatepark=self.skatepark, body='Test body')
+        self.post.save()
+
     def test_author_label(self):
         """
         ラベルを投稿者にするテスト
@@ -145,7 +141,6 @@ class SkateparkModelTest(TestCase):
         投稿内容の文字数が301以上の時エラーをあげるテスト
         """
         post = Post(author=self.user, skatepark=self.skatepark, body='a'*301)
-    
         with self.assertRaises(DataError):
              post.save()
 
