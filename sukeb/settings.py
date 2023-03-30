@@ -1,8 +1,10 @@
 from pathlib import Path
 import os
 
-import environ
+from dotenv import load_dotenv
 
+
+load_dotenv('.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,15 +15,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # staticフォルダーのパス
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
-env = environ.Env()
-env.read_env('.env')
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = ['localhost']
 
