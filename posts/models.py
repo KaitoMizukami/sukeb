@@ -8,6 +8,18 @@ from .prefectures import PREFECTURE_CHOICES
 User = get_user_model()
 
 
+class Common(models.Model):
+    """
+    抽象モデル
+    """
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='投稿者')
+    # オブジェクトが最初に作成されたときに、フィールドを now に自動的に設定
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='投稿日')
+
+    class Meta:
+        abstract = True
+
+
 class Skatepark(models.Model):
     """
     スケートパークに関するモデル
@@ -25,7 +37,7 @@ class Skatepark(models.Model):
         return f'{self.name}({self.prefecture})'
 
 
-class Post(models.Model):
+class Post(Common):
     """ 
     投稿に関するモデル
     """
@@ -47,3 +59,18 @@ class Post(models.Model):
         各インスタンスに対応するURLを返す 
         """
         return reverse('posts:detail', kwargs={'pk': self.pk})
+    
+
+class Comment(Common):
+    """ 
+    投稿のコメントに関するモデル
+    """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    body = models.CharField(max_length=150, verbose_name='コメント内容')
+
+    class Meta:
+        verbose_name = 'コメント'
+        verbose_name_plural = 'コメント'
+    
+    def __str__(self):
+        return self.body[:50]
