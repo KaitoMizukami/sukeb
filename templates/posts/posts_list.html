@@ -17,6 +17,11 @@
                 </div>
                 <div class="content">
                     <strong>{{ post.author }}</strong>
+                    <p class="is-size-5">
+                        <a href="{{ post.get_absolute_url }}">
+                            <strong>{{ post.skatepark }}</strong>
+                        </a>
+                    </p>
                     <div class="block">
                         {% comment %} 投稿内容が75文字以上だったらそれ以降は表示しない {% endcomment %}
                         {{ post.body|truncatechars:75 }}
