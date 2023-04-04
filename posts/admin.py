@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Post, Skatepark
+from .models import Post, Skatepark, Comment
 
 
 @admin.register(Post)
@@ -39,3 +39,19 @@ class LocationAdmin(admin.ModelAdmin):
 
     # 検索される時に使われるフィールド
     search_fields = ('name',)
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('post', 'author', 'body', 'created_at')
+    fieldsets = (
+        ('コメント', {
+            'fields': (
+                'post',
+                'author',
+                'body',
+            )
+        }),
+    )
+    list_filter = ('author', 'created_at', )
+    search_fields = ('author',)
