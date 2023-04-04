@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
 from django.views.generic import (
-    ListView, DetailView
+    ListView, DetailView, CreateView
 )
 from django.db.models import Q
 
 from .models import Post
 from .prefectures import PREFECTURE_CHOICES, PREFECTURE_ID
-from .forms import CommentForm
+from .forms import CommentForm, SkateparkForm, PostForm
 
 
 class PostsListView(ListView):
@@ -96,3 +96,47 @@ class PostsDetailView(DetailView):
             comment.save()
             return redirect('posts:detail', pk=post.id)
         return render(request, 'posts/posts_detail', pk=post_id)
+    
+
+class PostsCreateView(CreateView):
+    """ 
+    投稿の作成フォームをHTMLに渡す
+    Postメソッドでリクエストが来たらフォームの検証をし保存する
+    """
+    template_name = 'posts/posts_create.html'
+
+    def get(self, request):
+        """ 
+        Getリクエスト時の処理
+        PostとSkateparkモデルのフォーム2つをHTMLに渡す
+        """
+        post_form = PostForm()
+        skatepark_form = SkateparkForm()
+        context = {
+            'post_form': post_form,
+            'skatepark_form': skatepark_form
+        }
+        return render(request, 'posts/posts_create.html', context)
+
+    def post(self, request, *args, **kwargs):
+        """ 
+        Postリクエスト時の処理
+        Post, Skateparkモデルのフォームを検証しデータを保存する
+        検証成功すれば投稿一覧ページにリダイレクトし、失敗したら同じページを返す
+        """
+        post_form = PostForm(request.POST, prefix='post')
+        skatepark_form = SkateparkForm(request.POST, request.FILES, prefix='skatepark')
+        if post_form.is_valid() and skatepark_form.is_valid():
+            new_skatepark = skatepark_form.save()
+            # postモデルのオブジェクトを作成
+            # commit=Falseでまだデータベースには保存されない
+            new_post = post_form.save(commit=False)
+            new_post.skatepark = new_skatepark
+            new_post.author = request.user
+            new_post.save()
+            return redirect('posts:list')
+        context = {
+            'post_form': post_form,
+            'location_form': skatepark_form
+        }
+        return render(request, 'posts/posts_create.html', context)
