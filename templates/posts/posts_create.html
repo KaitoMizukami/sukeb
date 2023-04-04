@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="columns is-centered">
+    <div class="column is-half has-background-link-light">
+        <form method='POST' enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ skatepark_form.as_p }}
+            {{ post_form.as_p }}
+            <a class="button is-info mr-3" href="{{ request.META.HTTP_REFERER }}">戻る</a>
+            <button class="button is-primary">投稿</button>
+        </form>
+    </div>
+</div>
+
+{% endblock content %}
