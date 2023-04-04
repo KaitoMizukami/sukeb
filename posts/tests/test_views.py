@@ -80,3 +80,32 @@ class PostsListViewTest(TestCase):
         response = PostsListView.as_view()(request)
         self.assertIsInstance(response.context_data, dict)
         self.assertEqual(response.context_data['prefectures'], PREFECTURE_CHOICES)
+
+
+class PostsCreateViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create(username='loginuser', email='loginuser@mail.com', password='testpassword')
+        self.url_name = 'posts:create'
+        self.template_name = 'posts/posts_create.html'
+
+    def test_view_url_exists_at_desired_location(self):
+        """ 
+        PostsCreateViewが正しいURLにあるかテスト
+        """
+        response = self.client.get('/posts/create/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        """ 
+        名前つきURLでアクセスできるかテスト
+        """
+        response = self.client.get(reverse(self.url_name))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        """ 
+        PostsCreateViewが正しいテンプレートファイルを使っているかテスト
+        """
+        response = self.client.get(reverse(self.url_name))
+        self.assertTemplateUsed(response, self.template_name)
