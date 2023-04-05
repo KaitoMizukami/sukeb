@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.views.generic import (
-    ListView, DetailView, CreateView
+    ListView, DetailView, CreateView, DeleteView
 )
 from django.db.models import Q
 
@@ -140,3 +141,12 @@ class PostsCreateView(CreateView):
             'location_form': skatepark_form
         }
         return render(request, 'posts/posts_create.html', context)
+    
+
+class PostsDeleteView(DeleteView):
+    """
+    投稿削除するHTMLを渡す
+    """
+    template_name = 'posts/posts_delete.html'
+    model = Post
+    success_url = reverse_lazy('posts:list')
