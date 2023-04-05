@@ -109,3 +109,56 @@ class PostsCreateViewTest(TestCase):
         """
         response = self.client.get(reverse(self.url_name))
         self.assertTemplateUsed(response, self.template_name)
+
+
+class PostsDeleteViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User(username='loginuser', email='loginuser@mail.com', password='testpassword')
+        self.user.save()
+        self.skatepark = Skatepark(name='test1', prefecture='神奈川県', city='横浜市', skatepark_image='test1')
+        self.skatepark.save()
+        self.post = Post(
+            body='This is a test post.',
+            author=self.user,
+            skatepark=self.skatepark
+        )
+        self.post.save()
+        self.url = reverse('posts:delete', kwargs={'pk': self.post.pk})
+        self.template_name = 'posts/posts_delete.html'
+
+    def test_view_url_exists_at_desired_location(self):
+        """ 
+        PostsDeleteViewが正しいURLにあるかテスト
+        """
+        response = self.client.get(f'/posts/delete/{self.post.pk}')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        """ 
+        名前つきURLでアクセスできるかテスト
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        """ 
+        PostsDeleteViewが正しいテンプレートファイルを使っているかテスト
+        """
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, self.template_name)
+
+    def test_view_can_delete_posts(self):
+        """ 
+        PostsDeleteViewが投稿を削除できるかテスト
+        """
+        _ = self.client.post(self.url)
+        self.assertFalse(Post.objects.filter(pk=self.post.pk).exists())
+
+    def test_view_redirects_post_list_page_if_deletion_successful(self):
+        """ 
+        投稿削除が成功したら投稿リストにリダイレクトするテスト
+        """
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('posts:list'))
