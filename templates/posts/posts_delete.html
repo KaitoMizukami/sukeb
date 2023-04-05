@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="columns is-centered mt-5">
+    <div class="column is-two-fifths">
+        <article class="message is-warning">
+            <div class="message-header">
+                <p>注意</p>
+            </div>
+            <div class="message-body">
+                パーク名: "{{ post.skatepark.name }}"
+                <br>
+                投稿内容: "{{ post.body }}"
+                <br>
+                を削除しますか
+            </div>
+        </article>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <input class="button is-danger" type="submit" value="削除">
+        </form>
+    </div>
+</div>
+
+{% endblock content %}

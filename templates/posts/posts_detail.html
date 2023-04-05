@@ -28,6 +28,9 @@
             <div class="block">
                 作成日: {{ post.created_at }}
             </div>
+            {% if request.user == post.author %}
+                <a class="button is-danger" href="{% url 'posts:delete' post.id %}">削除</a>
+            {% endif %}
         </div>
         <br>
         <h4 class="is-size-4">コメントを書く</h4>
