@@ -1,7 +1,7 @@
 from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 
-from posts.models import Skatepark, Post
+from posts.models import Skatepark, Post, Comment
 from posts.views import PostsListView
 from posts.prefectures import PREFECTURE_CHOICES
 from authentications.models import User
@@ -80,6 +80,44 @@ class PostsListViewTest(TestCase):
         response = PostsListView.as_view()(request)
         self.assertIsInstance(response.context_data, dict)
         self.assertEqual(response.context_data['prefectures'], PREFECTURE_CHOICES)
+
+
+class PostsDetailView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User(username='loginuser', email='loginuser@mail.com', password='testpassword')
+        self.user.save()
+        self.skatepark = Skatepark(name='test1', prefecture='神奈川県', city='横浜市', skatepark_image='test1')
+        self.skatepark.save()
+        self.post = Post(
+            body='This is a test post.',
+            author=self.user,
+            skatepark=self.skatepark
+        )
+        self.post.save()
+        self.url = reverse('posts:detail', kwargs={'pk': self.post.pk})
+        self.template_name = 'posts/posts_detail.html'
+
+    def test_view_url_exists_at_desired_location(self):
+        """ 
+        PostsDetailViewが正しいURLにあるかテスト
+        """
+        response = self.client.get(f'/posts/detail/{self.post.pk}')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        """ 
+        名前つきURLでアクセスできるかテスト
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        """ 
+        PostsDetailViewが正しいテンプレートファイルを使っているかテスト
+        """
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, self.template_name)
 
 
 class PostsCreateViewTest(TestCase):
