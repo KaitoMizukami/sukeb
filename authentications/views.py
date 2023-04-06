@@ -48,6 +48,9 @@ class AuthenticationsSignupView(UnauthenticatedOnly, FormView):
 
 
 class AuthenticationsLoginView(UnauthenticatedOnly ,FormView):
+    """ 
+    ログインフォームを渡す
+    """
     template_name = 'authentications/authentications_login.html'
     form_class = UserLoginForm
 
