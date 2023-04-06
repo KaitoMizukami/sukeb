@@ -79,3 +79,56 @@ class AuthenticationsSignupViewTest(TestCase):
         """
         response = self.client.post(reverse(self.url_name), {})
         self.assertTemplateUsed(response, self.template_name)
+
+
+class AuthenticationsLoginViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user = User.objects.create(username='testuser', email='test@mail.com')
+        user.set_password('testpassword')
+        user.save()
+
+    def setUp(self):
+        self.client = Client()
+        self.template_name = 'authentications/authentications_login.html'
+        self.credentials = {
+            'email': 'test@mail.com', 'password': 'testpassword'
+        }
+        self.url_name = 'authentications:login'
+
+    def test_view_url_exists_at_desired_location(self):
+        """ 
+        AuthenticationsLoginViewが正しいテンプレートファイルを使っているかテスト
+        """
+        response = self.client.get('/accounts/login/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        """ 
+        名前つきURLでアクセスできるかテスト
+        """
+        response = self.client.get(reverse(self.url_name))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        """ 
+        AuthenticationsLoginViewが正しいテンプレートファイルを使っているかテスト
+        """
+        response = self.client.get(reverse(self.url_name))
+        self.assertTemplateUsed(response, self.template_name)
+
+    def test_view_can_login(self):
+        """ 
+        ログインできるかテスト
+        """
+        response = self.client.post(reverse(self.url_name), self.credentials, follow=True)
+        self.assertTrue(response.context['user'].is_authenticated)
+
+    def test_redirect_to_login_page_if_user_not_found(self):
+        """ 
+        ユーザーが見つからなかったらログインページにリダイレクトするテスト
+        """
+        response = self.client.post(reverse(self.url_name), {
+            'email': 'aaaaa@mail.com', 'password': 'aaaaaaaaa'
+        }, follow=True)
+        self.assertTemplateUsed(response, self.template_name)
