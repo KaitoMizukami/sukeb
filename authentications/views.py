@@ -3,7 +3,7 @@ from django.views.generic import FormView
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
 
-from .forms import UserCreationForm
+from .forms import UserCreationForm, UserLoginForm
 
 
 User = get_user_model()
@@ -31,3 +31,22 @@ class AuthenticationsSignupView(FormView):
             return redirect('posts:list')
         else:
             return render(request, self.template_name, {'form': user_form})
+
+
+class AuthenticationsLoginView(FormView):
+    template_name = 'authentications/authentications_login.html'
+    form_class = UserLoginForm
+
+    def post(self, request, *args, **kwargs):
+        """ 
+        Postリクエスト時の処理
+        送信されたメールアドレスとパスワードでユーザーを検索し見つかったらログインする
+        見つからなかったらログインページを返す
+        """
+        email = request.POST['email']
+        password = request.POST['password']
+        user = authenticate(email=email, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('posts:list')
+        return redirect('authentications:login')
