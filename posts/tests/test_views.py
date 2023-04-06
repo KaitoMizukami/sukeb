@@ -85,7 +85,8 @@ class PostsListViewTest(TestCase):
 class PostsDetailView(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User(username='loginuser', email='loginuser@mail.com', password='testpassword')
+        self.user = User.objects.create(username='loginuser', email='loginuser@mail.com')
+        self.user.set_password('testpassword')
         self.user.save()
         self.skatepark = Skatepark(name='test1', prefecture='神奈川県', city='横浜市', skatepark_image='test1')
         self.skatepark.save()
@@ -102,6 +103,7 @@ class PostsDetailView(TestCase):
         """ 
         PostsDetailViewが正しいURLにあるかテスト
         """
+        _ = self.client.login(email='loginuser@mail.com', password='testpassword')
         response = self.client.get(f'/posts/detail/{self.post.pk}')
         self.assertEqual(response.status_code, 200)
 
@@ -109,6 +111,7 @@ class PostsDetailView(TestCase):
         """ 
         名前つきURLでアクセスできるかテスト
         """
+        _ = self.client.login(email='loginuser@mail.com', password='testpassword')
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
@@ -116,16 +119,24 @@ class PostsDetailView(TestCase):
         """ 
         PostsDetailViewが正しいテンプレートファイルを使っているかテスト
         """
+        _ = self.client.login(email='loginuser@mail.com', password='testpassword')
         response = self.client.get(self.url)
         self.assertTemplateUsed(response, self.template_name)
 
 
 class PostsCreateViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user = User.objects.create(username='loginuser', email='loginuser@mail.com')
+        user.set_password('testpassword')
+        user.save()
+
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create(username='loginuser', email='loginuser@mail.com', password='testpassword')
+        self.client.login(email='loginuser@mail.com', password='testpassword') 
         self.url_name = 'posts:create'
         self.template_name = 'posts/posts_create.html'
+
 
     def test_view_url_exists_at_desired_location(self):
         """ 
@@ -152,7 +163,8 @@ class PostsCreateViewTest(TestCase):
 class PostsDeleteViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User(username='loginuser', email='loginuser@mail.com', password='testpassword')
+        self.user = User.objects.create(username='loginuser', email='loginuser@mail.com')
+        self.user.set_password('testpassword')
         self.user.save()
         self.skatepark = Skatepark(name='test1', prefecture='神奈川県', city='横浜市', skatepark_image='test1')
         self.skatepark.save()
@@ -169,6 +181,7 @@ class PostsDeleteViewTest(TestCase):
         """ 
         PostsDeleteViewが正しいURLにあるかテスト
         """
+        _ = self.client.login(email='loginuser@mail.com', password='testpassword')
         response = self.client.get(f'/posts/delete/{self.post.pk}')
         self.assertEqual(response.status_code, 200)
 
@@ -176,6 +189,7 @@ class PostsDeleteViewTest(TestCase):
         """ 
         名前つきURLでアクセスできるかテスト
         """
+        _ = self.client.login(email='loginuser@mail.com', password='testpassword')
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
@@ -183,6 +197,7 @@ class PostsDeleteViewTest(TestCase):
         """ 
         PostsDeleteViewが正しいテンプレートファイルを使っているかテスト
         """
+        _ = self.client.login(email='loginuser@mail.com', password='testpassword')
         response = self.client.get(self.url)
         self.assertTemplateUsed(response, self.template_name)
 
@@ -190,6 +205,7 @@ class PostsDeleteViewTest(TestCase):
         """ 
         PostsDeleteViewが投稿を削除できるかテスト
         """
+        _ = self.client.login(email='loginuser@mail.com', password='testpassword')
         _ = self.client.post(self.url)
         self.assertFalse(Post.objects.filter(pk=self.post.pk).exists())
 
@@ -197,6 +213,7 @@ class PostsDeleteViewTest(TestCase):
         """ 
         投稿削除が成功したら投稿リストにリダイレクトするテスト
         """
+        _ = self.client.login(email='loginuser@mail.com', password='testpassword')
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('posts:list'))

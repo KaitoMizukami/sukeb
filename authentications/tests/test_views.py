@@ -80,6 +80,19 @@ class AuthenticationsSignupViewTest(TestCase):
         response = self.client.post(reverse(self.url_name), {})
         self.assertTemplateUsed(response, self.template_name)
 
+    def test_authenticated_user_redirect_to_main_page(self):
+        """ 
+        ログイン済みのユーザーは投稿一覧ページにリダイレクトするテスト
+        """
+        _ = self.client.post(reverse('authentications:login'), self.credentials)
+        response = self.client.get(reverse(self.url_name))
+        # リダイレクト(302)が発生したかテスト
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse(self.url_name), follow=True)
+        # リダイレクト先のHTMLファイルを確認
+        self.assertTemplateNotUsed(response, self.template_name)
+        self.assertTemplateUsed(response, 'posts/posts_list.html')
+
 
 class AuthenticationsLoginViewTest(TestCase):
     @classmethod
@@ -123,6 +136,15 @@ class AuthenticationsLoginViewTest(TestCase):
         """
         response = self.client.post(reverse(self.url_name), self.credentials, follow=True)
         self.assertTrue(response.context['user'].is_authenticated)
+
+    def test_authenticated_user_redirect_to_main_page(self):
+        """
+        ログイン済みのユーザーは投稿一覧ページにリダイレクトされるテスト
+        """
+        response = self.client.post(reverse(self.url_name), self.credentials, follow=True)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse(self.url_name), follow=True)
+        self.assertTemplateUsed(response, 'posts/posts_list.html')
 
     def test_redirect_to_login_page_if_user_not_found(self):
         """ 
