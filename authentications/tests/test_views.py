@@ -194,3 +194,41 @@ class AuthenticationsLogoutViewTest(TestCase):
         self.assertTrue(response.context['user'].is_authenticated)
         response = self.client.get(reverse('authentications:logout'), follow=True)
         self.assertFalse(response.context['user'].is_authenticated)
+
+
+class UserProfileViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user = User.objects.create(username='testuser', email='test@mail.com')
+        user.set_password('testpassword')
+        user.save()
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.get(email='test@mail.com')
+        self.credentials = {
+            'email': 'test@mail.com', 'password': 'testpassword'
+        }
+        self.template_name = 'authentications/user_profile.html'
+        self.url = reverse('authentications:profile', kwargs={'pk': self.user.pk})
+
+    def test_view_url_exists_at_desired_location(self):
+        """ 
+        UserProfileViewが正しいURLにあるかテスト
+        """
+        response = self.client.get(f'/accounts/profile/{self.user.pk}')
+        self.assertEqual(response.status_code, 200)
+                                  
+    def test_view_url_accessible_by_name(self):
+        """ 
+        名前つきURLでアクセスできるかテスト
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+    
+    def test_view_uses_correct_template(self):
+        """ 
+        UserProfileViewが正しいテンプレートファイルを使っているかテスト
+        """
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, self.template_name)
