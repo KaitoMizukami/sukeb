@@ -13,5 +13,22 @@
                 投稿作成
             </a>
         </div>
+  
+    <div class="navbar-end">
+        <div class="navbar-item">
+            <div class="buttons">
+                {% if request.user.is_authenticated %}
+                    <p class="mr-6">{{ request.user }}さん、ようこそ</p>
+                    <a class="button is-warning" href="{% url 'authentications:logout' %}">ログアウト</a>
+                {% else %}
+                    <a class="button is-primary" href="{% url 'authentications:signup' %}">
+                        <strong>新規登録</strong>
+                    </a>
+                    <a class="button is-light" href="{% url 'authentications:login' %}">
+                        ログイン
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </nav>
