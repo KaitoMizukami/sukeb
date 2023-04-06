@@ -5,19 +5,30 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 
 class UserCreationForm(forms.ModelForm):
-    password = forms.CharField(label='パスワード', min_length=8, widget=forms.PasswordInput())
-    confirm_password = forms.CharField(label='確認用パスワード', widget=forms.PasswordInput())
-    username = forms.CharField(label='ユーザーネーム')
-    email = forms.EmailField(label='メールアドレス')
+    password = forms.CharField(label='パスワード', min_length=8, widget=forms.PasswordInput(attrs={
+        'class': 'input mb-4'
+    }))
+    confirm_password = forms.CharField(label='確認用パスワード', widget=forms.PasswordInput(attrs={
+        'class': 'input mb-4'
+    }))
+
+    username = forms.CharField(label='ユーザーネーム', widget=forms.TextInput(
+        attrs={
+            'class': 'input mb-4'
+        }
+    ))
+
+    email = forms.EmailField(label='メールアドレス', widget=forms.TextInput(
+        attrs={
+            'class': 'input mb-4'
+        }
+    ))
 
     class Meta:
         model = get_user_model()
         fields = ('username', 'email', 'password')
     
     def clean(self):
-        """ 
-        フォームを検証する
-        """
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
         confirm_password = cleaned_data.get('confirm_password')
@@ -25,9 +36,6 @@ class UserCreationForm(forms.ModelForm):
             raise ValidationError('パスワードが一致しません')
     
     def save(self, commit=False):
-        """ 
-        ユーザーフォームを保存してユーザーを作成する
-        """
         user = super().save(commit=False)
         password = self.cleaned_data.get('password')
         user.set_password(password)
