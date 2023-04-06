@@ -16,7 +16,9 @@
                     <img src="{{ post.skatepark.skatepark_image.url }}" width="270" height="420">
                 </div>
                 <div class="content">
-                    <strong>{{ post.author }}</strong>
+                    <a href="{% url 'authentications:profile' pk=post.author.id %}">
+                        <strong>{{ post.author }}</strong>
+                    </a>
                     <p class="is-size-5">
                         <a href="{{ post.get_absolute_url }}">
                             <strong>{{ post.skatepark }}</strong>
