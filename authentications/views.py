@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import FormView, View
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 from .forms import UserCreationForm, UserLoginForm
 
@@ -9,7 +10,20 @@ from .forms import UserCreationForm, UserLoginForm
 User = get_user_model()
 
 
-class AuthenticationsSignupView(FormView):
+class UnauthenticatedOnly(UserPassesTestMixin):
+    """
+    ログイン済みのユーザーのアクセスを制限する
+    """
+    def test_func(self):
+        # ログイン状態じゃないかチェック
+        return not self.request.user.is_authenticated
+    
+    def handle_no_permission(self):
+        # ログイン状態なら投稿一覧へリダイレクト
+        return redirect('posts:list')
+
+
+class AuthenticationsSignupView(UnauthenticatedOnly, FormView):
     """ 
     ユーザーの登録フォームをHTMLに渡す
     """
@@ -33,7 +47,7 @@ class AuthenticationsSignupView(FormView):
             return render(request, self.template_name, {'form': user_form})
 
 
-class AuthenticationsLoginView(FormView):
+class AuthenticationsLoginView(UnauthenticatedOnly ,FormView):
     template_name = 'authentications/authentications_login.html'
     form_class = UserLoginForm
 
@@ -50,7 +64,7 @@ class AuthenticationsLoginView(FormView):
             login(request, user)
             return redirect('posts:list')
         return redirect('authentications:login')
-    
+
 
 class AuthenticationsLogoutView(View):
     """
