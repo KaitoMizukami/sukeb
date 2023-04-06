@@ -4,10 +4,29 @@ from django.views.generic import (
     ListView, DetailView, CreateView, DeleteView
 )
 from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from .models import Post
 from .prefectures import PREFECTURE_CHOICES, PREFECTURE_ID
 from .forms import CommentForm, SkateparkForm, PostForm
+
+
+class AuthorOnly(LoginRequiredMixin, UserPassesTestMixin):
+    """
+    ユーザーのアクセスを制限するクラス
+    """
+    def test_func(self):
+        """
+        投稿の作者とログインしてるユーザーが同じかどうか判定する
+        """
+        post = self.get_object()
+        return post.author == self.request.user
+    
+    def handle_no_permission(self):
+        """
+        test_funcでFlaseだった場合特定のページにリダイレクトする
+        """
+        return redirect('posts:detail', pk=self.kwargs['pk'])
 
 
 class PostsListView(ListView):
@@ -42,7 +61,7 @@ class PostsListView(ListView):
         return context
 
 
-class PostsDetailView(DetailView):
+class PostsDetailView(LoginRequiredMixin ,DetailView):
     """
     投稿の詳細情報をHTMLに渡す
     """
@@ -99,7 +118,7 @@ class PostsDetailView(DetailView):
         return render(request, 'posts/posts_detail', pk=post_id)
     
 
-class PostsCreateView(CreateView):
+class PostsCreateView(LoginRequiredMixin, CreateView):
     """ 
     投稿の作成フォームをHTMLに渡す
     Postメソッドでリクエストが来たらフォームの検証をし保存する
@@ -143,7 +162,7 @@ class PostsCreateView(CreateView):
         return render(request, 'posts/posts_create.html', context)
     
 
-class PostsDeleteView(DeleteView):
+class PostsDeleteView(AuthorOnly, DeleteView):
     """
     投稿削除するHTMLを渡す
     """
