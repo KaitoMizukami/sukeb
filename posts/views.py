@@ -165,6 +165,7 @@ class PostsCreateView(LoginRequiredMixin, CreateView):
 class PostsDeleteView(AuthorOnly, DeleteView):
     """
     投稿削除するHTMLを渡す
+    削除成功後投稿一覧ページにリダイレクト
     """
     template_name = 'posts/posts_delete.html'
     model = Post
