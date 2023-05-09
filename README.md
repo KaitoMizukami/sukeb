@@ -19,7 +19,7 @@
 - Pillow
 - requests
 - Docker / docker-compose
-- Github Action
+- Github Action (CI)
 
 ## 機能一覧
 - ログイン / ログアウト
